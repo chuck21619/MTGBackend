@@ -23,7 +23,7 @@ FROM alpine:latest
 WORKDIR /root/
 
 # Copy the statically compiled binary from the builder stage
-COPY --from=builder /app/app /root/
+COPY --from=builder /app/app .
 
 # Copy frontend files from the host machine
 COPY --from=builder /app/../frontend ./frontend
@@ -32,4 +32,4 @@ COPY --from=builder /app/../frontend ./frontend
 EXPOSE 8080
 
 # Command to run the app
-CMD ["/root/app"]
+CMD ["./app"]
