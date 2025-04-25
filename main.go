@@ -8,8 +8,9 @@ import (
 )
 
 type User struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+    Email    string `json:"email"`
+    Password string `json:"password"`
+    Username string `json:"username"`
 }
 
 func registerHandler(w http.ResponseWriter, r *http.Request) {
