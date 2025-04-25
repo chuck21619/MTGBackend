@@ -1,5 +1,7 @@
 // db.go
 package main
+import "os"
+import "fmt"
 
 import (
 	"database/sql"
@@ -11,7 +13,8 @@ import (
 var db *sql.DB
 
 func initDB() {
-	connStr := "postgres://userdb_zvh9_user:qXoma9zbzVduyXtXdPiVPbb8RtqlS4c6@dpg-d05s8015pdvs73em8j5g-a.oregon-postgres.render.com/userdb_zvh9"
+	password := os.Getenv("DB_PASSWORD")
+	connStr := fmt.Sprintf("postgresql://userdb_zvh9_user:%s@dpg-d05s8015pdvs73em8j5g-a.oregon-postgres.render.com/userdb_zvh9", password)
 	var err error
 	db, err = sql.Open("postgres", connStr)
 	if err != nil {
