@@ -25,6 +25,9 @@ WORKDIR /root/
 # Copy the statically compiled binary from the builder stage
 COPY --from=builder /app/app /root/
 
+# Copy frontend files from the host machine
+COPY --from=builder /app/../frontend ./frontend
+
 # Expose the port on which your app is running
 EXPOSE 8080
 
