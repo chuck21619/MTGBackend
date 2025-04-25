@@ -25,7 +25,8 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = db.Exec("INSERT INTO users (email, password) VALUES ($1, $2)", u.Email, u.Password)
+	// Update the query to insert username
+	_, err = db.Exec("INSERT INTO users (email, password, username) VALUES ($1, $2, $3)", u.Email, u.Password, u.Username)
 	if err != nil {
 		log.Println("Insert error:", err)
 		http.Error(w, "Database insert failed", http.StatusInternalServerError)
@@ -35,6 +36,7 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte("User registered successfully"))
 }
+
 
 func main() {
 	initDB()
