@@ -81,7 +81,11 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	initDB()
 
+	http.Handle("/", http.FileServer(http.Dir("frontend")))
+
+
 	http.HandleFunc("/register", registerHandler)
+	//http.HandleFunc("/login", loginHandler)
 
 	log.Println("Listening on :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
