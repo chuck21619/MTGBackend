@@ -3,15 +3,34 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
+	"net/smtp"
+	"os"
 )
 
 type User struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 	Username string `json:"username"`
+}
+
+func sendEmail(to string, subject string, body string) error {
+	
+	from := os.Getenv("GMAIL_ADDRESS")
+	password := os.Getenv("GMAIL_APP_PASSWORD")
+
+	auth := smtp.PlainAuth("", from, password, "smtp.gmail.com")
+
+	message := []byte("Subject: " + subject + "\r\n" + "\r\n" + body)
+
+	err := smtp.SendMail("smtp.gmail.com:587", auth, from, []string{to}, message)
+	if err != nil {
+		return fmt.Errorf("failed to send email: %v", err)
+	}
+	return nil
 }
 
 func registerHandler(w http.ResponseWriter, r *http.Request) {
@@ -88,6 +107,20 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	initDB()
 
+	// Make sure the email credentials are set in environment variables
+	if os.Getenv("EMAIL_USER") == "" || os.Getenv("EMAIL_PASSWORD") == "" {
+		log.Fatal("Email credentials are not set in environment variables")
+	}
+
+	err := sendEmail("charles.ward.johnston@gmail.com", "Test Subject", "Test Body")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Email sent successfully!")
+
+
+
+	
 	http.Handle("/", http.FileServer(http.Dir("frontend")))
 
 	http.HandleFunc("/register", registerHandler)
