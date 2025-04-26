@@ -15,9 +15,12 @@ import (
 )
 
 type User struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Username string `json:"username"`
+	Email                         string    `json:"email"`
+	Password                      string    `json:"password"`
+	Username                      string    `json:"username"`
+	Verification_token            string    `json:"verification_token"`
+	Email_verified                bool      `json:"email_verified"`
+	Verification_token_expires_at time.Time `json:"verification_token_expires_at"`
 }
 
 func sendEmail(to string, subject string, body string) error {
@@ -62,12 +65,6 @@ func verifyEmailHandler(w http.ResponseWriter, r *http.Request) {
 	var tokenExpiration time.Time
 	err := db.QueryRow("SELECT id, email_verified, token_expiration FROM users WHERE verification_token = $1", token).Scan(&userID, &emailVerified, &tokenExpiration)
 	if err != nil {
-		w.Header().Set("Content-Type", "application/json")
-		http.Error(w, `{"error": "Invalid or expired token"}`, http.StatusNotFound)
-		return
-	}
-
-	if emailVerified {
 		w.Header().Set("Content-Type", "application/json")
 		http.Error(w, `{"error": "Invalid or expired token"}`, http.StatusNotFound)
 		return
@@ -167,6 +164,12 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		http.Error(w, `{"error": "Invalid credentials"}`, http.StatusUnauthorized)
+		return
+	}
+
+	if !u.Email_verified {
+		w.Header().Set("Content-Type", "application/json")
+		http.Error(w, `{"error": "Email has not been verified"}`, http.StatusNotFound)
 		return
 	}
 
