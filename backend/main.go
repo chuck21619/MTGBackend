@@ -62,7 +62,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Println(u.Username)
 	log.Println(u.Email)
-	
+
 	// Retrieve the stored hashed password from the database
 
 	var storedHash string
@@ -79,14 +79,14 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte("Login successful"))
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"message": "Login successful"})
 }
 
 func main() {
 	initDB()
 
 	http.Handle("/", http.FileServer(http.Dir("frontend")))
-
 
 	http.HandleFunc("/register", registerHandler)
 	http.HandleFunc("/login", loginHandler)
