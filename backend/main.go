@@ -62,7 +62,7 @@ func verifyEmailHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	var userID int
 	var emailVerified bool
-	err := db.QueryRow("SELECT email_verified FROM users WHERE verification_token = $1", token).Scan(&emailVerified)
+	err := db.QueryRow("SELECT id, email_verified FROM users WHERE verification_token = $1", token).Scan(&userID, &emailVerified)
 	if err != nil {
 		log.Println(err);
 		w.Header().Set("Content-Type", "application/json")
@@ -78,6 +78,7 @@ func verifyEmailHandler(w http.ResponseWriter, r *http.Request) {
 
 	_, err = db.Exec("UPDATE users SET email_verified = TRUE WHERE id = $1", userID)
 	if err != nil {
+		log.Println(err);
 		w.Header().Set("Content-Type", "application/json")
 		http.Error(w, `{"error": "Failed to verify email"}`, http.StatusInternalServerError)
 		return
