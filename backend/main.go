@@ -60,7 +60,11 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Println(u.Username)
+	log.Println(u.Email)
+	
 	// Retrieve the stored hashed password from the database
+
 	var storedHash string
 	err = db.QueryRow("SELECT password FROM users WHERE email = $1", u.Email).Scan(&storedHash)
 	if err != nil {
