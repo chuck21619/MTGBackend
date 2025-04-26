@@ -65,6 +65,7 @@ func verifyEmailHandler(w http.ResponseWriter, r *http.Request) {
 	var tokenExpiration time.Time
 	err := db.QueryRow("SELECT email_verified FROM users WHERE verification_token = '$1'", token).Scan(&userID, &emailVerified, &tokenExpiration)
 	if err != nil {
+		log.Println(err);
 		w.Header().Set("Content-Type", "application/json")
 		http.Error(w, `{"error": "Invalid or expired token"}`, http.StatusNotFound)
 		return
