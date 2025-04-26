@@ -160,7 +160,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var storedHash string
-	err = db.QueryRow("SELECT password FROM users WHERE username = $1", u.Username).Scan(&storedHash)
+	err = db.QueryRow("SELECT password, email_verified FROM users WHERE username = $1", u.Username).Scan(&storedHash, &u.Email_verified)
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		http.Error(w, `{"error": "Invalid credentials"}`, http.StatusUnauthorized)
