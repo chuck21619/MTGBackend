@@ -62,8 +62,7 @@ func verifyEmailHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	var userID int
 	var emailVerified bool
-	var tokenExpiration time.Time
-	err := db.QueryRow("SELECT email_verified FROM users WHERE verification_token = '$1'", token).Scan(&userID, &emailVerified, &tokenExpiration)
+	err := db.QueryRow("SELECT email_verified FROM users WHERE verification_token = $1", token).Scan(&emailVerified)
 	if err != nil {
 		log.Println(err);
 		w.Header().Set("Content-Type", "application/json")
