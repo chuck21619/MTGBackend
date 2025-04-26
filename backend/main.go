@@ -66,7 +66,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	// Retrieve the stored hashed password from the database
 
 	var storedHash string
-	err = db.QueryRow("SELECT password FROM users WHERE email = $1", u.Email).Scan(&storedHash)
+	err = db.QueryRow("SELECT password FROM users WHERE username = $1", u.Username).Scan(&storedHash)
 	if err != nil {
 		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 		return
