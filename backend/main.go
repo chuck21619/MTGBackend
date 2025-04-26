@@ -108,7 +108,7 @@ func main() {
 	initDB()
 
 	// Make sure the email credentials are set in environment variables
-	if os.Getenv("EMAIL_USER") == "" || os.Getenv("EMAIL_PASSWORD") == "" {
+	if os.Getenv("GMAIL_ADDRESS") == "" || os.Getenv("GMAIL_APP_PASSWORD") == "" {
 		log.Fatal("Email credentials are not set in environment variables")
 	}
 
