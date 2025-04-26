@@ -16,14 +16,16 @@ type User struct {
 
 func registerHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		w.Header().Set("Content-Type", "application/json")
+		http.Error(w, `{"error": "Invalid request method"}`, http.StatusMethodNotAllowed)
 		return
 	}
 
 	var u User
 	err := json.NewDecoder(r.Body).Decode(&u)
 	if err != nil {
-		http.Error(w, "Bad request", http.StatusBadRequest)
+		w.Header().Set("Content-Type", "application/json")
+		http.Error(w, `{"error": "Bad request"}`, http.StatusBadRequest)
 		return
 	}
 
@@ -31,7 +33,8 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 	if err != nil {
 		log.Println("Error hashing password:", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "application/json")
+		http.Error(w, `{"error": "Internal server error"}`, http.StatusInternalServerError)
 		return
 	}
 
@@ -39,7 +42,8 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 	_, err = db.Exec("INSERT INTO users (email, password, username) VALUES ($1, $2, $3)", u.Email, hashedPassword, u.Username)
 	if err != nil {
 		log.Println("Insert error:", err)
-		http.Error(w, "Database insert failed", http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "application/json")
+		http.Error(w, `{"error": "Database insert failed"}`, http.StatusInternalServerError)
 		return
 	}
 
@@ -49,29 +53,31 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		w.Header().Set("Content-Type", "application/json")
+		http.Error(w, `{"error": "Invalid request method"}`, http.StatusMethodNotAllowed)
 		return
 	}
 
 	var u User
 	err := json.NewDecoder(r.Body).Decode(&u)
 	if err != nil {
-		http.Error(w, "Bad request", http.StatusBadRequest)
+		w.Header().Set("Content-Type", "application/json")
+		http.Error(w, `{"error": "Bad request"}`, http.StatusBadRequest)
 		return
 	}
-	// Retrieve the stored hashed password from the database
 
 	var storedHash string
 	err = db.QueryRow("SELECT password FROM users WHERE username = $1", u.Username).Scan(&storedHash)
 	if err != nil {
-		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		w.Header().Set("Content-Type", "application/json")
+		http.Error(w, `{"error": "Invalid credentials"}`, http.StatusUnauthorized)
 		return
 	}
 
-	// Compare the entered password to the stored hash
 	err = bcrypt.CompareHashAndPassword([]byte(storedHash), []byte(u.Password))
 	if err != nil {
-		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		w.Header().Set("Content-Type", "application/json")
+		http.Error(w, `{"error": "Invalid credentials"}`, http.StatusUnauthorized)
 		return
 	}
 
