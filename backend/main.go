@@ -119,7 +119,7 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 	// Generate token expiration time (24 hours from now)
 	expirationTime := time.Now().Add(24 * time.Hour)
 	// Insert the new user into the database with the verification token and emailVerified set to false
-	_, err = db.Exec("INSERT INTO users (email, password, username, verification_token, email_verified, token_expires_at) VALUES ($1, $2, $3, $4, $5, $6)", u.Email, hashedPassword, u.Username, token, false, expirationTime)
+	_, err = db.Exec("INSERT INTO users (email, password, username, verification_token, email_verified, verification_token_expires_at) VALUES ($1, $2, $3, $4, $5, $6)", u.Email, hashedPassword, u.Username, token, false, expirationTime)
 	if err != nil {
 		log.Println("Insert error:", err)
 		w.Header().Set("Content-Type", "application/json")
