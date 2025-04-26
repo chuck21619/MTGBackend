@@ -59,10 +59,6 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
-
-	log.Println(u.Username)
-	log.Println(u.Email)
-
 	// Retrieve the stored hashed password from the database
 
 	var storedHash string

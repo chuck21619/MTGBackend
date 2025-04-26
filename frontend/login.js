@@ -20,5 +20,6 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
       messageEl.style.color = 'red';
       messageEl.textContent = `Login failed: ${error}`;
     }
+    console.log(messageEl.textContent);
   });
   
