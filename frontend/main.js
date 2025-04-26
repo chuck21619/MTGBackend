@@ -23,7 +23,6 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     });
 
     const data = await res.json();
-    console.log(data.error);
     alert(data.error || "Login response received.");
 });
 
@@ -40,5 +39,5 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
     });
 
     const data = await res.json();
-    alert(data.message || "Registration response received.");
+    alert(data.message || data.error || "Registration response received.");
 });
