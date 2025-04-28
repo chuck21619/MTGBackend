@@ -1,26 +1,32 @@
 // db.go
-package main
-import "os"
-import "fmt"
+package db
 
 import (
 	"database/sql"
+	"fmt"
+	"os"
 	"log"
-
 	_ "github.com/lib/pq"
 )
 
-var db *sql.DB
+// Database struct to hold the db connection
+type Database struct {
+	*sql.DB
+}
 
-func initDB() {
+// NewDatabase initializes the database connection and returns a Database instance
+func NewDatabase() *Database {
 	password := os.Getenv("DB_PASSWORD")
 	connStr := fmt.Sprintf("postgresql://userdb_zvh9_user:%s@dpg-d05s8015pdvs73em8j5g-a.oregon-postgres.render.com/userdb_zvh9", password)
-	var err error
-	db, err = sql.Open("postgres", connStr)
+
+	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal("Error connecting to DB:", err)
 	}
+
 	if err = db.Ping(); err != nil {
 		log.Fatal("Could not ping DB:", err)
 	}
+
+	return &Database{DB: db}
 }

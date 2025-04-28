@@ -24,6 +24,8 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
 
     const data = await res.json();
     console.log(data);
+    const jwt = data.access_token;
+    console.log("look at me im mr jwt:", jwt);
     alert(data.error || data.message || "Login response received.");
 });
 
