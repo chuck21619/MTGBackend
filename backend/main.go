@@ -2,11 +2,11 @@
 package main
 
 import (
+	"GoAndDocker/backend/db"
+	"GoAndDocker/backend/handlers"
 	"log"
 	"net/http"
-    "GoAndDocker/backend/db"
-	"GoAndDocker/backend/handlers"
-	"os"
+	"strings"
 )
 
 type Router struct {
@@ -14,37 +14,31 @@ type Router struct {
 }
 
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	
-	staticFilePath := "frontend" + req.URL.Path
-    if fileExists(staticFilePath) {
-        log.Println("Serving static file: ", staticFilePath)
-        http.FileServer(http.Dir("frontend")).ServeHTTP(w, req)
-        return
-    }
-	 
+
+	if strings.HasPrefix(req.URL.Path, "/static/") {
+		http.DefaultServeMux.ServeHTTP(w, req) // hand off to /static/ handler
+		return
+	}
+
 	switch req.URL.Path {
-    case "/register":
-        handlers.RegisterHandler(w, req, r.DB)  // Pass DB here
-    case "/login":
-        handlers.LoginHandler(w, req, r.DB)  // Pass DB here
-    case "/verify-email":
-        handlers.VerifyEmailHandler(w, req, r.DB)  // Pass DB here
-    default:
-        http.NotFound(w, req)
-    }
+	case "/register":
+		handlers.RegisterHandler(w, req, r.DB) // Pass DB here
+	case "/login":
+		handlers.LoginHandler(w, req, r.DB) // Pass DB here
+	case "/verify-email":
+		handlers.VerifyEmailHandler(w, req, r.DB) // Pass DB here
+	default:
+		http.NotFound(w, req)
+	}
 }
 
 func main() {
-    database := db.NewDatabase()
-    router := &Router{DB: database}
-    log.Println("Listening on :8080")
-    log.Fatal(http.ListenAndServe(":8080", router))
-}
+	database := db.NewDatabase()
+	router := &Router{DB: database}
 
-func fileExists(path string) bool {
-    info, err := os.Stat(path)
-    if err != nil {
-        return false
-    }
-    return !info.IsDir()
+	fs := http.FileServer(http.Dir("frontend"))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
+
+	log.Println("Listening on :8080")
+	log.Fatal(http.ListenAndServe(":8080", router))
 }
