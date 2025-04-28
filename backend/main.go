@@ -32,11 +32,11 @@ func main() {
     router := &Router{DB: database}
 
 	log.Println("Serving files from: ", http.Dir("frontend"))
-	// http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-	// 	log.Println("Request URL: ", r.URL)
-	// 	http.FileServer(http.Dir("frontend")).ServeHTTP(w, r)
-	// })
-	http.Handle("/", http.FileServer(http.Dir("frontend")))
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		log.Println("Request URL: ", r.URL)
+		http.FileServer(http.Dir("frontend")).ServeHTTP(w, r)
+	})
+	// http.Handle("/", http.FileServer(http.Dir("frontend")))
     log.Println("Listening on :8080")
     log.Fatal(http.ListenAndServe(":8080", router))
 }
