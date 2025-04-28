@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
@@ -22,6 +23,13 @@ type User struct {
 	Email_verified                bool      `json:"email_verified"`
 	Verification_token_expires_at time.Time `json:"verification_token_expires_at"`
 }
+
+type Claims struct {
+	Username string `json:"username"`
+	jwt.RegisteredClaims
+}
+
+var jwtKey = []byte("your_secret_key_here")
 
 func sendEmail(to string, subject string, body string) error {
 
@@ -64,13 +72,13 @@ func verifyEmailHandler(w http.ResponseWriter, r *http.Request) {
 	var emailVerified bool
 	err := db.QueryRow("SELECT id, email_verified FROM users WHERE verification_token = $1", token).Scan(&userID, &emailVerified)
 	if err != nil {
-		log.Println(err);
+		log.Println(err)
 		w.Header().Set("Content-Type", "application/json")
 		http.Error(w, `{"error": "Invalid or expired token"}`, http.StatusNotFound)
 		return
 	}
 
-	if (emailVerified) {
+	if emailVerified {
 		w.Header().Set("Content-Type", "application/json")
 		http.Error(w, `{"error": "Email is already verified"}`, http.StatusNotFound)
 		return
@@ -78,7 +86,7 @@ func verifyEmailHandler(w http.ResponseWriter, r *http.Request) {
 
 	_, err = db.Exec("UPDATE users SET email_verified = TRUE WHERE id = $1", userID)
 	if err != nil {
-		log.Println(err);
+		log.Println(err)
 		w.Header().Set("Content-Type", "application/json")
 		http.Error(w, `{"error": "Failed to verify email"}`, http.StatusInternalServerError)
 		return
@@ -141,7 +149,7 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"message": "User registered successfully"})
+	json.NewEncoder(w).Encode(map[string]string{"message": "Please verify your email to log in"})
 }
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
@@ -180,8 +188,59 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Create JWT token
+	expirationTime := time.Now().Add(15 * time.Minute)
+	claims := &Claims{
+		Username: u.Username,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expirationTime),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(jwtKey)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		http.Error(w, `{"error": "Internal server error"}`, http.StatusInternalServerError)
+		return
+	}
+
+	// refresh token valid for 30 days
+	refreshExpirationTime := time.Now().Add(30 * 24 * time.Hour)
+	refreshClaims := &Claims{
+		Username: u.Username,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(refreshExpirationTime),
+		},
+	}
+
+	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
+	refreshTokenString, err := refreshToken.SignedString(jwtKey)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		http.Error(w, `{"error": "Internal server error"}`, http.StatusInternalServerError)
+		return
+	}
+
+	// Set refresh token as secure HttpOnly cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    refreshTokenString,
+		Expires:  refreshExpirationTime,
+		HttpOnly: true,
+		Secure:   true, // true if using HTTPS
+		Path:     "/",
+		SameSite: http.SameSiteStrictMode,
+	})
+
+	// Send access token in response body
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"message": "Login successful"})
+	json.NewEncoder(w).Encode(map[string]string{
+		"access_token": tokenString,
+	})
+
+	// w.Header().Set("Content-Type", "application/json")
+	// json.NewEncoder(w).Encode(map[string]string{"message": "Login successful"})
 }
 
 func main() {
