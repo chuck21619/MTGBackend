@@ -27,11 +27,11 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 func main() {
 
-    database := db.NewDatabase()
-    router := &Router{DB: database}
+    // database := db.NewDatabase()
+    // router := &Router{DB: database}
 
 
 	http.Handle("/", http.FileServer(http.Dir("frontend")))
-    log.Println("Listening on :8080")
-    log.Fatal(http.ListenAndServe(":8080", router))
+    // log.Println("Listening on :8080")
+    // log.Fatal(http.ListenAndServe(":8080", router))
 }
