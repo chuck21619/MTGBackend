@@ -23,6 +23,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     });
 
     const data = await res.json();
+    console.log(data);
     alert(data.error || data.message || "Login response received.");
 });
 
