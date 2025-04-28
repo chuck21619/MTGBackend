@@ -27,6 +27,7 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 func main() {
 
+	log.Println("IS IT GETTING STUCL")
     database := db.NewDatabase()
     router := &Router{DB: database}
 
