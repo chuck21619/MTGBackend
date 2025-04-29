@@ -32,6 +32,6 @@ func NewDatabase() *Database {
 }
 
 func (d *Database) UpdateUserEmail(userID string, newEmail string) error {
-	_, err := d.DB.Exec("UPDATE users SET email = $1 WHERE id = $2", newEmail, userID)
+	_, err := d.DB.Exec("UPDATE users SET email = $1 WHERE username = $2", newEmail, userID)
 	return err
 }
