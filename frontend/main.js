@@ -3,6 +3,7 @@ const registerView = document.getElementById("registerView");
 const dashboardView = document.getElementById("dashboardView");
 const messageLabel = document.getElementById("messageLabel");
 const fetchMessageButton = document.getElementById("fetchMessageButton");
+const logoutButton = document.getElementById("logoutButton");
 
 document.getElementById("showRegister").addEventListener("click", () => {
     loginView.style.display = "none";
@@ -33,7 +34,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
         loginView.style.display = "none";
         dashboardView.style.display = "block";
     } else {
-        alert(data.message || "Login response received.");
+        alert(data.error || data.message || "Login response received.");
     }
 });
 
@@ -50,7 +51,7 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
     });
 
     const data = await res.json();
-    alert(data.message || "Registration response received.");
+    alert(data.message || data.error || "Registration response received.");
 });
 
 // Button to fetch a message from a protected route
@@ -74,4 +75,12 @@ fetchMessageButton.addEventListener("click", async () => {
     } else {
         messageLabel.textContent = "Failed to fetch message.";
     }
+});
+
+// Button to log the user out
+logoutButton.addEventListener("click", () => {
+    localStorage.removeItem("access_token");
+    dashboardView.style.display = "none";
+    loginView.style.display = "block";
+    alert("You have been logged out.");
 });
