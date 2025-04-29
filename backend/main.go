@@ -4,6 +4,7 @@ package main
 import (
 	"GoAndDocker/backend/db"
 	"GoAndDocker/backend/handlers"
+	"GoAndDocker/backend/utils"
 	"log"
 	"net/http"
 	"strings"
@@ -38,6 +39,7 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
+	utils.InitJWT()
 	database := db.NewDatabase()
 	router := &Router{DB: database}
 
