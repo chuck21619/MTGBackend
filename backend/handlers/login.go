@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"GoAndDocker/backend/db"
 	"GoAndDocker/backend/models"
 	"GoAndDocker/backend/utils"
-	"GoAndDocker/backend/db"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -50,6 +50,18 @@ func LoginHandler(w http.ResponseWriter, r *http.Request, database *db.Database)
 	refreshToken, refreshExpirationTime, err := utils.GenerateRefreshToken(u.Username)
 	if err != nil {
 		utils.WriteJSONMessage(w, http.StatusInternalServerError, "Internal server error")
+		return
+	}
+	
+	hashedRefreshToken, err := bcrypt.GenerateFromPassword([]byte(refreshToken), bcrypt.DefaultCost)
+	if err != nil {
+		utils.WriteJSONMessage(w, http.StatusInternalServerError, "Internal server error")
+		return
+	}
+
+	_, err = database.Exec("UPDATE users SET refresh_token_hash = $1 WHERE username = $2", hashedRefreshToken, u.Username)
+	if err != nil {
+		utils.WriteJSONMessage(w, http.StatusInternalServerError, "Failed to save refresh token")
 		return
 	}
 
