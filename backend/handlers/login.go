@@ -43,19 +43,19 @@ func LoginHandler(w http.ResponseWriter, r *http.Request, database *db.Database)
 
 	accessToken, _, err := utils.GenerateAccessToken(u.Username)
 	if err != nil {
-		utils.WriteJSONMessage(w, http.StatusInternalServerError, "Internal server error")
+		utils.WriteJSONMessage(w, http.StatusInternalServerError, "Error generating access token")
 		return
 	}
 
 	refreshToken, refreshExpirationTime, err := utils.GenerateRefreshToken(u.Username)
 	if err != nil {
-		utils.WriteJSONMessage(w, http.StatusInternalServerError, "Internal server error")
+		utils.WriteJSONMessage(w, http.StatusInternalServerError, "error generating refresh token")
 		return
 	}
 	
 	hashedRefreshToken, err := bcrypt.GenerateFromPassword([]byte(refreshToken), bcrypt.DefaultCost)
 	if err != nil {
-		utils.WriteJSONMessage(w, http.StatusInternalServerError, "Internal server error")
+		utils.WriteJSONMessage(w, http.StatusInternalServerError, "error hashing refresh token")
 		return
 	}
 
