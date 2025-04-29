@@ -35,3 +35,17 @@ func (d *Database) UpdateUserEmail(userID string, newEmail string) error {
 	_, err := d.DB.Exec("UPDATE users SET email = $1 WHERE username = $2", newEmail, userID)
 	return err
 }
+
+func (d *Database) GetRefreshTokenHash(username string) (string, error) {
+	var hash string
+	err := d.DB.QueryRow("SELECT refresh_token_hash FROM users WHERE username = $1", username).Scan(&hash)
+	if err != nil {
+		return "", err
+	}
+	return hash, nil
+}
+
+func (d *Database) StoreRefreshToken(username string, hashedToken string) error {
+	_, err := d.DB.Exec("UPDATE users SET refresh_token_hash = $1 WHERE username = $2", hashedToken, username)
+	return err
+}

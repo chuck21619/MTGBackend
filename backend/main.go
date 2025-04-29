@@ -35,6 +35,8 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		handlers.VerifyEmailHandler(w, req, r.DB)
 	case "/api/update-email":
 		handlers.UpdateEmailHandler(w, req, r.DB)
+	case "/api/refresh-token":
+		handlers.RefreshTokenHandler(w, req, r.DB)	
 	default:
 		http.NotFound(w, req)
 	}

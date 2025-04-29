@@ -55,10 +55,9 @@ func LoginHandler(w http.ResponseWriter, r *http.Request, database *db.Database)
 		utils.WriteJSONMessage(w, http.StatusInternalServerError, "error generating refresh token")
 		return
 	}
-	
-	hash := sha256.Sum256([]byte(refreshToken))
-	hashedRefreshToken := hex.EncodeToString(hash[:])
-	_, err = database.Exec("UPDATE users SET refresh_token_hash = $1 WHERE username = $2", hashedRefreshToken, u.Username)
+
+	hashedRefreshToken := utils.HashRefreshToken(refreshToken)
+	err = database.StoreRefreshToken(u.Username, hashedRefreshToken)
 	if err != nil {
 		utils.WriteJSONMessage(w, http.StatusInternalServerError, "Failed to save refresh token")
 		return

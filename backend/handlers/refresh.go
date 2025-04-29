@@ -1,0 +1,70 @@
+package handlers
+
+import (
+	"GoAndDocker/backend/db"
+	"GoAndDocker/backend/models"
+	"GoAndDocker/backend/utils"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"strings"
+
+	"github.com/golang-jwt/jwt/v5"
+)
+
+func RefreshTokenHandler(w http.ResponseWriter, r *http.Request, database *db.Database) {
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
+		utils.WriteJSONMessage(w, http.StatusUnauthorized, "Missing or invalid Authorization header")
+		return
+	}
+
+	refreshToken := strings.TrimPrefix(authHeader, "Bearer ")
+
+	claims := &models.Claims{}
+	token, err := jwt.ParseWithClaims(refreshToken, claims, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method")
+		}
+		return utils.JwtKey, nil
+	})
+
+	if err != nil || !token.Valid {
+		utils.WriteJSONMessage(w, http.StatusUnauthorized, "Invalid or expired refresh token")
+		return
+	}
+
+	storedHash, err := database.GetRefreshTokenHash(claims.Username)
+	if err != nil || !utils.CheckPasswordHash(refreshToken, storedHash) {
+		utils.WriteJSONMessage(w, http.StatusUnauthorized, "Invalid refresh token")
+		return
+	}
+
+	newAccessToken, _, err := utils.GenerateAccessToken(claims.Username)
+	if err != nil {
+		utils.WriteJSONMessage(w, http.StatusInternalServerError, "Failed to create access token")
+		return
+	}
+
+	newRefreshToken, _, err := utils.GenerateRefreshToken(claims.Username)
+	if err != nil {
+		utils.WriteJSONMessage(w, http.StatusInternalServerError, "Failed to create refresh token")
+		return
+	}
+
+	hashedNewRefresh := utils.HashRefreshToken(newRefreshToken)
+	if err != nil {
+		utils.WriteJSONMessage(w, http.StatusInternalServerError, "Failed to hash refresh token")
+		return
+	}
+
+	if err := database.StoreRefreshToken(claims.Username, hashedNewRefresh); err != nil {
+		utils.WriteJSONMessage(w, http.StatusInternalServerError, "Failed to store refresh token")
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]string{
+		"access_token":  newAccessToken,
+		"refresh_token": newRefreshToken,
+	})
+}

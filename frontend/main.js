@@ -69,7 +69,7 @@ updateEmailButton.addEventListener("click", async () => {
         return;
     }
 
-    const res = await fetch("/api/update-email", {
+    const res = await authFetch("/api/update-email", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -90,3 +90,39 @@ logoutButton.addEventListener("click", () => {
     loginView.style.display = "block";
     alert("You have been logged out.");
 });
+
+async function authFetch(url, options = {}) {
+    let token = localStorage.getItem("access_token");
+
+    const res = await fetch(url, {
+        ...options,
+        headers: {
+            ...options.headers,
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+        },
+    });
+
+    if (res.status === 401) {
+        // Try refresh
+        const refreshRes = await fetch("/api/refresh-token", {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${localStorage.getItem("refresh_token")}` }
+        });
+
+        const refreshData = await refreshRes.json();
+        if (refreshRes.ok && refreshData.access_token) {
+            localStorage.setItem("access_token", refreshData.access_token);
+            // Retry original request
+            return authFetch(url, options);
+        } else {
+            alert("Session expired. Please log in again.");
+            localStorage.removeItem("access_token");
+            localStorage.removeItem("refresh_token");
+            window.location.reload();
+            return;
+        }
+    }
+
+    return res;
+}

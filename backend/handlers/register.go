@@ -8,7 +8,6 @@ import (
 	"GoAndDocker/backend/models"
 	"GoAndDocker/backend/utils"
 	"GoAndDocker/backend/db"
-	"golang.org/x/crypto/bcrypt"
 )
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request, database *db.Database) {
@@ -24,7 +23,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request, database *db.Databa
 		return
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
+	hashedPassword, err := utils.HashPassword(u.Password)
 	if err != nil {
 		utils.WriteJSONMessage(w, http.StatusInternalServerError, "Internal server error")
 		return
