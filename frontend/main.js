@@ -4,6 +4,8 @@ const dashboardView = document.getElementById("dashboardView");
 const messageLabel = document.getElementById("messageLabel");
 const fetchMessageButton = document.getElementById("fetchMessageButton");
 const logoutButton = document.getElementById("logoutButton");
+const newEmailInput = document.getElementById("newEmailInput");
+const updateEmailButton = document.getElementById("updateEmailButton");
 
 document.getElementById("showRegister").addEventListener("click", () => {
     loginView.style.display = "none";
@@ -56,13 +58,16 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
 
 // Button to fetch a message from a protected route
 fetchMessageButton.addEventListener("click", async () => {
+    console.log("nothing here yet");
+});
+
+updateEmailButton.addEventListener("click", async () => {
     const token = localStorage.getItem("access_token");
-    if (!token) {
-        alert("Please log in first.");
+    const newEmail = newEmailInput.value.trim();
+    if (!token || !newEmail) {
+        alert("Please log in and enter a valid email.");
         return;
     }
-
-    const newEmail = "nothing";
 
     const res = await fetch("/api/update-email", {
         method: "POST",
@@ -74,8 +79,9 @@ fetchMessageButton.addEventListener("click", async () => {
     });
 
     const data = await res.json();
-    alert(data.message || "Registration response received.");
+    alert(data.message || "No response message.");
 });
+
 
 // Button to log the user out
 logoutButton.addEventListener("click", () => {
