@@ -1,5 +1,8 @@
 const loginView = document.getElementById("loginView");
 const registerView = document.getElementById("registerView");
+const dashboardView = document.getElementById("dashboardView");
+const messageLabel = document.getElementById("messageLabel");
+const fetchMessageButton = document.getElementById("fetchMessageButton");
 
 document.getElementById("showRegister").addEventListener("click", () => {
     loginView.style.display = "none";
@@ -24,9 +27,14 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
 
     const data = await res.json();
     console.log(data);
-    const jwt = data.access_token;
-    console.log("look at me im mr jwt:", jwt);
-    alert(data.error || data.message || "Login response received.");
+
+    if (data.access_token) {
+        localStorage.setItem("access_token", data.access_token);
+        loginView.style.display = "none";
+        dashboardView.style.display = "block";
+    } else {
+        alert(data.message || "Login response received.");
+    }
 });
 
 document.getElementById("registerForm").addEventListener("submit", async (e) => {
@@ -42,5 +50,28 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
     });
 
     const data = await res.json();
-    alert(data.message || data.error || "Registration response received.");
+    alert(data.message || "Registration response received.");
+});
+
+// Button to fetch a message from a protected route
+fetchMessageButton.addEventListener("click", async () => {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+        alert("Please log in first.");
+        return;
+    }
+
+    const res = await fetch("/api/protected", {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${token}`
+        }
+    });
+
+    const data = await res.json();
+    if (data.message) {
+        messageLabel.textContent = data.message;
+    } else {
+        messageLabel.textContent = "Failed to fetch message.";
+    }
 });
