@@ -2,12 +2,13 @@ package handlers
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
 	"GoAndDocker/backend/db"
 	"GoAndDocker/backend/models"
 	"GoAndDocker/backend/utils"
+    "crypto/sha256"
+    "encoding/hex"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -55,13 +56,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request, database *db.Database)
 		return
 	}
 	
-	hashedRefreshToken, err := bcrypt.GenerateFromPassword([]byte(refreshToken), bcrypt.DefaultCost)
-	if err != nil {
-		log.Println(err)
-		utils.WriteJSONMessage(w, http.StatusInternalServerError, "error hashing refresh token")
-		return
-	}
-
+	hash := sha256.Sum256([]byte(refreshToken))
+	hashedRefreshToken := hex.EncodeToString(hash[:])
 	_, err = database.Exec("UPDATE users SET refresh_token_hash = $1 WHERE username = $2", hashedRefreshToken, u.Username)
 	if err != nil {
 		utils.WriteJSONMessage(w, http.StatusInternalServerError, "Failed to save refresh token")
