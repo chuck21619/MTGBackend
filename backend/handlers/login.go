@@ -2,11 +2,13 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"GoAndDocker/backend/db"
 	"GoAndDocker/backend/models"
 	"GoAndDocker/backend/utils"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -55,6 +57,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request, database *db.Database)
 	
 	hashedRefreshToken, err := bcrypt.GenerateFromPassword([]byte(refreshToken), bcrypt.DefaultCost)
 	if err != nil {
+		log.Println(err)
 		utils.WriteJSONMessage(w, http.StatusInternalServerError, "error hashing refresh token")
 		return
 	}
