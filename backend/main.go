@@ -19,13 +19,18 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		http.DefaultServeMux.ServeHTTP(w, req) // hand off to /static/ handler
 		return
 	}
+	
+	if req.URL.Path == "/" {
+		http.ServeFile(w, req, "frontend/index.html")
+		return
+	}
 
 	switch req.URL.Path {
-	case "/register":
+	case "/api/register":
 		handlers.RegisterHandler(w, req, r.DB) // Pass DB here
-	case "/login":
+	case "/api/login":
 		handlers.LoginHandler(w, req, r.DB) // Pass DB here
-	case "/verify-email":
+	case "/api/verify-email":
 		handlers.VerifyEmailHandler(w, req, r.DB) // Pass DB here
 	default:
 		http.NotFound(w, req)
