@@ -70,7 +70,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request, database *db.Database)
 		Expires:  refreshExpirationTime,
 		HttpOnly: true,
 		Secure:   true,
-		Path:     "/",
+		Path:     "/api/refresh",
 		SameSite: http.SameSiteStrictMode,
 	})
 

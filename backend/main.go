@@ -17,7 +17,7 @@ type Router struct {
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	if strings.HasPrefix(req.URL.Path, "/static/") {
-		http.DefaultServeMux.ServeHTTP(w, req) // hand off to /static/ handler
+		http.DefaultServeMux.ServeHTTP(w, req)
 		return
 	}
 	
@@ -28,11 +28,13 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	switch req.URL.Path {
 	case "/api/register":
-		handlers.RegisterHandler(w, req, r.DB) // Pass DB here
+		handlers.RegisterHandler(w, req, r.DB)
 	case "/api/login":
-		handlers.LoginHandler(w, req, r.DB) // Pass DB here
+		handlers.LoginHandler(w, req, r.DB)
 	case "/api/verify-email":
-		handlers.VerifyEmailHandler(w, req, r.DB) // Pass DB here
+		handlers.VerifyEmailHandler(w, req, r.DB)
+	case "/api/update-email":
+		handlers.UpdateEmailHandler(w, req, r.DB)
 	default:
 		http.NotFound(w, req)
 	}

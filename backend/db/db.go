@@ -30,3 +30,8 @@ func NewDatabase() *Database {
 
 	return &Database{DB: db}
 }
+
+func (d *Database) UpdateUserEmail(userID string, newEmail string) error {
+	_, err := d.DB.Exec("UPDATE users SET email = ? WHERE id = ?", newEmail, userID)
+	return err
+}

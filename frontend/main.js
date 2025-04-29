@@ -34,7 +34,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
         loginView.style.display = "none";
         dashboardView.style.display = "block";
     } else {
-        alert(data.error || data.message || "Login response received.");
+        alert(data.message || "Login response received.");
     }
 });
 
@@ -51,7 +51,7 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
     });
 
     const data = await res.json();
-    alert(data.message || data.error || "Registration response received.");
+    alert(data.message || "Registration response received.");
 });
 
 // Button to fetch a message from a protected route
@@ -62,19 +62,19 @@ fetchMessageButton.addEventListener("click", async () => {
         return;
     }
 
-    const res = await fetch("/api/protected", {
-        method: "GET",
+    new_email = "nothing";
+
+    const res = await fetch("/api/update-email", {
+        method: "POST",
         headers: {
+            "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`
-        }
+        },
+        body: JSON.stringify({ new_email: newEmail })
     });
 
     const data = await res.json();
-    if (data.message) {
-        messageLabel.textContent = data.message;
-    } else {
-        messageLabel.textContent = "Failed to fetch message.";
-    }
+    alert(data.message || "Registration response received.");
 });
 
 // Button to log the user out
