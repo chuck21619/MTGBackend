@@ -62,7 +62,7 @@ fetchMessageButton.addEventListener("click", async () => {
         return;
     }
 
-    new_email = "nothing";
+    const newEmail = "nothing";
 
     const res = await fetch("/api/update-email", {
         method: "POST",
