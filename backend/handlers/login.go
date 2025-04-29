@@ -7,8 +7,6 @@ import (
 	"GoAndDocker/backend/db"
 	"GoAndDocker/backend/models"
 	"GoAndDocker/backend/utils"
-    "crypto/sha256"
-    "encoding/hex"
 
 	"golang.org/x/crypto/bcrypt"
 )
