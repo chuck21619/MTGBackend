@@ -44,25 +44,30 @@ func RefreshTokenHandler(w http.ResponseWriter, r *http.Request, database *db.Da
 		return
 	}
 
-	newRefreshToken, _, err := utils.GenerateRefreshToken(claims.Username)
+	newRefreshToken, refreshExpirationTime, err := utils.GenerateRefreshToken(claims.Username)
 	if err != nil {
 		utils.WriteJSONMessage(w, http.StatusInternalServerError, "Failed to create refresh token")
 		return
 	}
 
 	hashedNewRefresh := utils.HashRefreshToken(newRefreshToken)
-	if err != nil {
-		utils.WriteJSONMessage(w, http.StatusInternalServerError, "Failed to hash refresh token")
-		return
-	}
-
 	if err := database.StoreRefreshToken(claims.Username, hashedNewRefresh); err != nil {
 		utils.WriteJSONMessage(w, http.StatusInternalServerError, "Failed to store refresh token")
 		return
 	}
+	
+	http.SetCookie(w, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    newRefreshToken,
+		Expires:  refreshExpirationTime,
+		HttpOnly: true,
+		Secure:   true,
+		Path:     "/api/refresh-token",
+		SameSite: http.SameSiteStrictMode,
+	})
 
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{
 		"access_token":  newAccessToken,
-		"refresh_token": newRefreshToken,
 	})
 }
