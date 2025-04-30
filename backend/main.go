@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"github.com/joho/godotenv"
 )
 
 type Router struct {
@@ -40,6 +41,11 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	default:
 		http.NotFound(w, req)
 	}
+}
+
+func init() {
+	//load local environment variables
+	godotenv.Load()
 }
 
 func main() {

@@ -20,7 +20,11 @@ func SendEmail(to string, subject string, body string) error {
 }
 
 func SendVerificationEmail(userEmail, token string) error {
-	verificationURL := fmt.Sprintf("https://goanddocker.onrender.com/api/verify-email?token=%s", token)
+	baseURL := os.Getenv("BASE_URL")
+	if baseURL == "" {
+		baseURL = "https://goanddocker.onrender.com"
+	}
+	verificationURL := fmt.Sprintf("%s/api/verify-email?token=%s", baseURL, token)
 	subject := "Please verify your email address"
 	body := fmt.Sprintf("Click this link to verify your email address: %s", verificationURL)
 	return SendEmail(userEmail, subject, body)
