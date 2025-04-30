@@ -21,7 +21,7 @@ func InitJWT() {
 }
 
 func GenerateAccessToken(username string) (string, time.Time, error) {
-	expirationTime := time.Now().Add(1 * time.Minute)
+	expirationTime := time.Now().Add(15 * time.Minute)
 	claims := &models.Claims{
 		Username: username,
 		RegisteredClaims: jwt.RegisteredClaims{
