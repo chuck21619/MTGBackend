@@ -7,19 +7,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
 func RefreshTokenHandler(w http.ResponseWriter, r *http.Request, database *db.Database) {
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
-		utils.WriteJSONMessage(w, http.StatusUnauthorized, "Missing or invalid Authorization header")
+	cookie, err := r.Cookie("refresh_token")
+	if err != nil {
+		utils.WriteJSONMessage(w, http.StatusUnauthorized, "Missing refresh token cookie")
 		return
 	}
-
-	refreshToken := strings.TrimPrefix(authHeader, "Bearer ")
+	refreshToken := cookie.Value
 
 	claims := &models.Claims{}
 	token, err := jwt.ParseWithClaims(refreshToken, claims, func(token *jwt.Token) (interface{}, error) {
@@ -35,7 +33,7 @@ func RefreshTokenHandler(w http.ResponseWriter, r *http.Request, database *db.Da
 	}
 
 	storedHash, err := database.GetRefreshTokenHash(claims.Username)
-	if err != nil || !utils.CheckPasswordHash(refreshToken, storedHash) {
+	if err != nil || !utils.CheckRefreshTokenHash(refreshToken, storedHash) {
 		utils.WriteJSONMessage(w, http.StatusUnauthorized, "Invalid refresh token")
 		return
 	}

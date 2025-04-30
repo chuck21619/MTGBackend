@@ -107,7 +107,7 @@ async function authFetch(url, options = {}) {
         // Try refresh
         const refreshRes = await fetch("/api/refresh-token", {
             method: "POST",
-            headers: { "Authorization": `Bearer ${localStorage.getItem("refresh_token")}` }
+            credentials: "include",
         });
 
         const refreshData = await refreshRes.json();
@@ -117,8 +117,6 @@ async function authFetch(url, options = {}) {
             return authFetch(url, options);
         } else {
             alert("Session expired. Please log in again.");
-            localStorage.removeItem("access_token");
-            localStorage.removeItem("refresh_token");
             window.location.reload();
             return;
         }
