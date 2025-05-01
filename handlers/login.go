@@ -68,7 +68,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request, database *db.Database)
 		HttpOnly: true,
 		Secure:   true,
 		Path:     "/api/refresh-token",
-		SameSite: http.SameSiteStrictMode,
+		SameSite: http.SameSiteNoneMode,
 	})
 
 	w.Header().Set("Content-Type", "application/json")
