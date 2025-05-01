@@ -16,20 +16,7 @@ type Database struct {
 
 // NewDatabase initializes the database connection and returns a Database instance
 func NewDatabase() *Database {
-	user := os.Getenv("DB_USER")	
-	password := os.Getenv("DB_PASSWORD")
-	host := os.Getenv("DB_HOST")
-	port := os.Getenv("DB_PORT")
-	name := os.Getenv("DB_NAME")
-	sslMode := "require" // Default to 'require' for production
-
-	// If running locally, disable SSL
-	if os.Getenv("ENV") == "development" {
-		sslMode = "disable"
-	}
-	
-	connStr := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=%s", user, password, host, port, name, sslMode)
-
+	connStr := os.Getenv("DB_CONN_STR")
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal("Error connecting to DB:", err)
