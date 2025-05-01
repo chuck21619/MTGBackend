@@ -1,4 +1,3 @@
-// main.go
 package main
 
 import (
@@ -7,8 +6,9 @@ import (
 	"GoAndDocker/utils"
 	"log"
 	"net/http"
-	"strings"
 	"os"
+	"strings"
+
 	"github.com/joho/godotenv"
 )
 
@@ -17,7 +17,6 @@ type Router struct {
 }
 
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	// Handle API routes
 	if strings.HasPrefix(req.URL.Path, "/api/") {
 		switch req.URL.Path {
 		case "/api/register":
@@ -33,12 +32,10 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		default:
 			http.NotFound(w, req)
 		}
-		return
 	}
 }
 
 func init() {
-	//load local environment variables
 	godotenv.Load()
 }
 
@@ -46,10 +43,12 @@ func main() {
 	utils.InitJWT()
 	database := db.NewDatabase()
 	router := &Router{DB: database}
+
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080" // fallback for local dev
+		port = "8080" // fallback for local development
 	}
-	log.Println("Listening on :8080")
+
+	log.Printf("Listening on :%s", port)
 	log.Fatal(http.ListenAndServe("0.0.0.0:"+port, router))
 }
