@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"time"
 
-	"GoAndDocker/backend/models"
-	"GoAndDocker/backend/utils"
-	"GoAndDocker/backend/db"
+	"GoAndDocker/models"
+	"GoAndDocker/utils"
+	"GoAndDocker/db"
 )
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request, database *db.Database) {

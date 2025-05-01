@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"encoding/json"
 
-	"GoAndDocker/backend/db"
-	"GoAndDocker/backend/utils"
-	"GoAndDocker/backend/models"
+	"GoAndDocker/db"
+	"GoAndDocker/utils"
+	"GoAndDocker/models"
 
 	"github.com/golang-jwt/jwt/v5"
 )

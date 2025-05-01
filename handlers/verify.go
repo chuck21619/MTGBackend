@@ -3,7 +3,7 @@ package handlers
 import (
 	"log"
 	"net/http"
-	"GoAndDocker/backend/db"
+	"GoAndDocker/db"
 )
 
 func VerifyEmailHandler(w http.ResponseWriter, r *http.Request, database *db.Database) {

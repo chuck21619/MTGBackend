@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"GoAndDocker/backend/db"
-	"GoAndDocker/backend/models"
-	"GoAndDocker/backend/utils"
+	"GoAndDocker/db"
+	"GoAndDocker/models"
+	"GoAndDocker/utils"
 	"encoding/json"
 	"fmt"
 	"net/http"

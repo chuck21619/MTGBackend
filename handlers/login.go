@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"GoAndDocker/backend/db"
-	"GoAndDocker/backend/models"
-	"GoAndDocker/backend/utils"
+	"GoAndDocker/db"
+	"GoAndDocker/models"
+	"GoAndDocker/utils"
 
 	"golang.org/x/crypto/bcrypt"
 )

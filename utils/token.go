@@ -4,7 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"github.com/golang-jwt/jwt/v5"
-	"GoAndDocker/backend/models"
+	"GoAndDocker/models"
 	"time"
 	"os"
 	"log"
