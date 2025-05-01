@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/joho/godotenv"
+	"github.com/rs/cors"
 )
 
 type Router struct {
@@ -44,11 +45,20 @@ func main() {
 	database := db.NewDatabase()
 	router := &Router{DB: database}
 
+	// CORS middleware setup
+	corsHandler := cors.New(cors.Options{
+		AllowedOrigins: []string{"http://localhost:3000", "https://mtgfrontend.onrender.com"}, // Adjust this to your frontend URLs
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders: []string{"Content-Type", "Authorization"},
+		AllowCredentials: true,
+	})
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080" // fallback for local development
 	}
 
 	log.Printf("Listening on :%s", port)
-	log.Fatal(http.ListenAndServe("0.0.0.0:"+port, router))
+	// Wrap the router with the CORS handler
+	log.Fatal(http.ListenAndServe("0.0.0.0:"+port, corsHandler.Handler(router)))
 }
