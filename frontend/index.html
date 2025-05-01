@@ -1,47 +1,13 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login / Register</title>
-  <link rel="icon" href="/static/bird-icon.png" type="image/png">
-  <link rel="stylesheet" href="/static/styles.css">
-</head>
-<body>
-  <div id="loginView">
-    <h2>Login</h2>
-    <form id="loginForm">
-      <input type="text" placeholder="Username" id="loginUsername" required />
-      <input type="password" placeholder="Password" id="loginPassword" required />
-      <button type="submit">Login</button>
-    </form>
-    <a id="showRegister">Don't have an account? Register</a>
-  </div>
-
-  <div id="registerView" style="display: none;">
-    <h2>Register</h2>
-    <form id="registerForm">
-      <input type="text" placeholder="Username" id="registerUsername" required />
-      <input type="email" placeholder="Email" id="registerEmail" required />
-      <input type="password" placeholder="Password" id="registerPassword" required />
-      <button type="submit">Register</button>
-    </form>
-    <a id="showLogin">Already have an account? Login</a>
-  </div>
-
-  <!-- UI for Logged-in users -->
-  <div id="dashboardView" style="display: none;">
-    <h2>Welcome to your dashboard!</h2>
-    <p id="messageLabel">Your secret message will appear here.</p>
-    <button id="fetchMessageButton">Fetch Secret Message</button>
-    <div>
-      <h3>Update Email</h3>
-      <input type="email" id="newEmailInput" placeholder="Enter new email" />
-      <button id="updateEmailButton">Update Email</button>
-    </div>    
-    <button id="logoutButton">Logout</button>
-  </div>
-
-  <script src="/static/main.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + React</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>

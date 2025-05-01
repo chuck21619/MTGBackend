@@ -16,31 +16,39 @@ type Router struct {
 }
 
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-
-	if strings.HasPrefix(req.URL.Path, "/static/") {
-		http.DefaultServeMux.ServeHTTP(w, req)
+	// Handle API routes
+	if strings.HasPrefix(req.URL.Path, "/api/") {
+		switch req.URL.Path {
+		case "/api/register":
+			handlers.RegisterHandler(w, req, r.DB)
+		case "/api/login":
+			handlers.LoginHandler(w, req, r.DB)
+		case "/api/verify-email":
+			handlers.VerifyEmailHandler(w, req, r.DB)
+		case "/api/update-email":
+			handlers.UpdateEmailHandler(w, req, r.DB)
+		case "/api/refresh-token":
+			handlers.RefreshTokenHandler(w, req, r.DB)
+		default:
+			http.NotFound(w, req)
+		}
 		return
 	}
-	
-	if req.URL.Path == "/" {
-		http.ServeFile(w, req, "frontend/index.html")
+
+	// Serve frontend static files
+	staticFS := http.FileServer(http.Dir("frontend/dist"))
+	if _, err := fsOpen("frontend/dist" + req.URL.Path); err == nil {
+		staticFS.ServeHTTP(w, req)
 		return
 	}
 
-	switch req.URL.Path {
-	case "/api/register":
-		handlers.RegisterHandler(w, req, r.DB)
-	case "/api/login":
-		handlers.LoginHandler(w, req, r.DB)
-	case "/api/verify-email":
-		handlers.VerifyEmailHandler(w, req, r.DB)
-	case "/api/update-email":
-		handlers.UpdateEmailHandler(w, req, r.DB)
-	case "/api/refresh-token":
-		handlers.RefreshTokenHandler(w, req, r.DB)	
-	default:
-		http.NotFound(w, req)
-	}
+	// Fallback to index.html for React Router (SPA)
+	http.ServeFile(w, req, "frontend/dist/index.html")
+}
+
+func fsOpen(path string) (http.File, error) {
+	fs := http.Dir(".")
+	return fs.Open(path)
 }
 
 func init() {
@@ -53,8 +61,8 @@ func main() {
 	database := db.NewDatabase()
 	router := &Router{DB: database}
 
-	fs := http.FileServer(http.Dir("frontend"))
-	http.Handle("/static/", http.StripPrefix("/static/", fs))
+	fs := http.FileServer(http.Dir("frontend/dist"))
+	http.Handle("/", fs)
 
 	log.Println("Listening on :8080")
 	log.Fatal(http.ListenAndServe(":8080", router))
