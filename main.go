@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"os"
 	"github.com/joho/godotenv"
 )
 
@@ -45,7 +46,10 @@ func main() {
 	utils.InitJWT()
 	database := db.NewDatabase()
 	router := &Router{DB: database}
-
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080" // fallback for local dev
+	}
 	log.Println("Listening on :8080")
-	log.Fatal(http.ListenAndServe(":8080", router))
+	log.Fatal(http.ListenAndServe("0.0.0.0:"+port, router))
 }
