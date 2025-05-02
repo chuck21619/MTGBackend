@@ -24,6 +24,8 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			handlers.RegisterHandler(w, req, r.DB)
 		case "/api/login":
 			handlers.LoginHandler(w, req, r.DB)
+		case "/api/logout":
+			handlers.LogoutHandler(w, req, r.DB)
 		case "/api/verify-email":
 			handlers.VerifyEmailHandler(w, req, r.DB)
 		case "/api/update-email":

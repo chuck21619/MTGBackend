@@ -46,3 +46,8 @@ func (d *Database) StoreRefreshToken(username string, hashedToken string) error 
 	_, err := d.DB.Exec("UPDATE users SET refresh_token_hash = $1 WHERE username = $2", hashedToken, username)
 	return err
 }
+
+func (db *Database) DeleteRefreshToken(username string) error {
+	_, err := db.Exec("UPDATE users SET refresh_token_hash = NULL WHERE username = $1", username)
+	return err
+}
