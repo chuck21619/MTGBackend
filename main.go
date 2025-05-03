@@ -43,10 +43,9 @@ func init() {
 }
 
 func loadEnv() {
-	// Only load environment variables from .env if we're not inside Docker
-	if os.Getenv("ENV") != "docker" {
-		err := godotenv.Load() // Load the normal .env file for local development
-		if err != nil {
+	env := os.Getenv("ENV")
+	if env != "docker" && env != "production" {
+		if err := godotenv.Load(); err != nil {
 			log.Fatal("Error loading .env file")
 		}
 	}
