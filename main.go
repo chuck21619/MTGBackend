@@ -39,8 +39,19 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 
 func init() {
-	godotenv.Load()
+	loadEnv()
 }
+
+func loadEnv() {
+	// Only load environment variables from .env if we're not inside Docker
+	if os.Getenv("ENV") != "docker" {
+		err := godotenv.Load() // Load the normal .env file for local development
+		if err != nil {
+			log.Fatal("Error loading .env file")
+		}
+	}
+}
+
 
 func main() {
 	utils.InitJWT()
