@@ -3,7 +3,7 @@ package handlers
 import (
 	"log"
 	"net/http"
-	"GoAndDocker/db"
+	"github.com/chuck21619/MTGBackend/db"
 )
 
 func VerifyEmailHandler(w http.ResponseWriter, r *http.Request, database *db.Database) {

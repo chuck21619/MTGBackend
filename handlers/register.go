@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"time"
 
-	"GoAndDocker/models"
-	"GoAndDocker/utils"
-	"GoAndDocker/db"
+	"github.com/chuck21619/MTGBackend/models"
+	"github.com/chuck21619/MTGBackend/utils"
+	"github.com/chuck21619/MTGBackend/db"
 )
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request, database *db.Database) {

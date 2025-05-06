@@ -3,8 +3,8 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"GoAndDocker/db"
-	"GoAndDocker/utils"
+	"github.com/chuck21619/MTGBackend/db"
+	"github.com/chuck21619/MTGBackend/utils"
 	"time"
 )
 

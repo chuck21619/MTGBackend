@@ -1,4 +1,4 @@
-module GoAndDocker
+module github.com/chuck21619/MTGBackend
 
 go 1.23.0
 

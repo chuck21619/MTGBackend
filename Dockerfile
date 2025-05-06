@@ -12,5 +12,8 @@ RUN go install github.com/pressly/goose/v3/cmd/goose@latest
 # Copy the rest of your backend code
 COPY . .
 
+# Install Go (if not already included in the base image)
+# RUN go install ./scripts/seed-user
+
 # Build nothing yet — we'll run things at container start
-CMD ["go", "run", "scripts/wait-for-db.go"]
+CMD ["go", "run", "main.go"]

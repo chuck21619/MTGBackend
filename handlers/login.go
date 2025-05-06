@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"GoAndDocker/db"
-	"GoAndDocker/models"
-	"GoAndDocker/utils"
+	"github.com/chuck21619/MTGBackend/db"
+	"github.com/chuck21619/MTGBackend/models"
+	"github.com/chuck21619/MTGBackend/utils"
 
 	"golang.org/x/crypto/bcrypt"
 )

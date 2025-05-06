@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"GoAndDocker/db"
-	"GoAndDocker/models"
-	"GoAndDocker/utils"
+	"github.com/chuck21619/MTGBackend/db"
+	"github.com/chuck21619/MTGBackend/models"
+	"github.com/chuck21619/MTGBackend/utils"
 	"encoding/json"
 	"fmt"
 	"net/http"

@@ -1,9 +1,9 @@
 package main
 
 import (
-	"GoAndDocker/db"
-	"GoAndDocker/handlers"
-	"GoAndDocker/utils"
+	"github.com/chuck21619/MTGBackend/db"
+	"github.com/chuck21619/MTGBackend/handlers"
+	"github.com/chuck21619/MTGBackend/utils"
 	"log"
 	"net/http"
 	"os"
