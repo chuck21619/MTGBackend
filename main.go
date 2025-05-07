@@ -59,7 +59,7 @@ func main() {
 
 	// CORS middleware setup
 	corsHandler := cors.New(cors.Options{
-		AllowedOrigins: []string{"http://localhost:5173", "https://mtgfrontend.onrender.com"}, // Adjust this to your frontend URLs
+		AllowedOrigins: []string{"http://localhost:5173", "https://mtgfrontend.onrender.com", "http://frontend:5173"}, // Adjust this to your frontend URLs
 		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders: []string{"Content-Type", "Authorization"},
 		AllowCredentials: true,
