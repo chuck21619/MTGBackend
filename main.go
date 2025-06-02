@@ -32,6 +32,8 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			handlers.UpdateEmailHandler(w, req, r.DB)
 		case "/api/refresh-token":
 			handlers.RefreshTokenHandler(w, req, r.DB)
+		case "/api/update-google-sheet":
+			handlers.GoogleSheetHandler(w, req, r.DB)
 		default:
 			http.NotFound(w, req)
 		}

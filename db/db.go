@@ -33,6 +33,11 @@ func (d *Database) UpdateUserEmail(userID string, newEmail string) error {
 	return err
 }
 
+func (d *Database) UpdateGoogleSheet(userID string, new_google_sheet string) error {
+	_, err := d.DB.Exec("UPDATE users SET google_sheet = $1 WHERE username = $2", new_google_sheet, userID)
+	return err
+}
+
 func (d *Database) GetRefreshTokenHash(username string) (string, error) {
 	var hash string
 	err := d.DB.QueryRow("SELECT refresh_token_hash FROM users WHERE username = $1", username).Scan(&hash)

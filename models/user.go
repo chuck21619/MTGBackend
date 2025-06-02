@@ -12,6 +12,7 @@ type User struct {
 	Verification_token            string    `json:"verification_token"`
 	Email_verified                bool      `json:"email_verified"`
 	Verification_token_expires_at time.Time `json:"verification_token_expires_at"`
+	GoogleSheet					  string    `json:"google_sheet"`
 }
 
 type Claims struct {
