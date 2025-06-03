@@ -34,6 +34,8 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			handlers.RefreshTokenHandler(w, req, r.DB)
 		case "/api/update-google-sheet":
 			handlers.GoogleSheetHandler(w, req, r.DB)
+		case "/api/populate":
+			handlers.PopulateHandler(w, req, r.DB)
 		default:
 			http.NotFound(w, req)
 		}

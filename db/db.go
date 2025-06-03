@@ -38,6 +38,15 @@ func (d *Database) UpdateGoogleSheet(userID string, new_google_sheet string) err
 	return err
 }
 
+func (d *Database) GetGoogleSheet(username string) (string, error) {
+	var result string
+	err := d.DB.QueryRow("SELECT google_sheet FROM users WHERE username = $1", username).Scan(&result)
+	if err != nil {
+		return "", err
+	}
+	return result, nil
+}
+
 func (d *Database) GetRefreshTokenHash(username string) (string, error) {
 	var hash string
 	err := d.DB.QueryRow("SELECT refresh_token_hash FROM users WHERE username = $1", username).Scan(&hash)
