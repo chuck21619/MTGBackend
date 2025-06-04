@@ -36,6 +36,8 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			handlers.GoogleSheetHandler(w, req, r.DB)
 		case "/api/populate":
 			handlers.PopulateHandler(w, req, r.DB)
+		case "/api/predict":
+			handlers.PredictHandler(w, req, r.DB)
 		default:
 			http.NotFound(w, req)
 		}

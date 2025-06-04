@@ -2,12 +2,14 @@ package handlers
 
 import (
 	"encoding/csv"
+	"encoding/json"
 	"fmt"
 	"io"
+	"os"
+	"bytes"
 	"net/http"
 	"sort"
 	"strings"
-	"encoding/json"
 
 	"github.com/chuck21619/MTGBackend/db"
 	"github.com/chuck21619/MTGBackend/models"
@@ -19,9 +21,6 @@ import (
 type Game map[string]string
 
 func PopulateHandler(w http.ResponseWriter, r *http.Request, database *db.Database) {
-
-	print("LOOK AT ME IM MR MEESEIX")
-
 	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
 		utils.WriteJSONMessage(w, http.StatusUnauthorized, "Missing or invalid Authorization header")
@@ -55,8 +54,6 @@ func PopulateHandler(w http.ResponseWriter, r *http.Request, database *db.Databa
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(players)
-	fmt.Println(decks)
 
 	response := map[string][]string{
 		"players": players,
@@ -66,6 +63,70 @@ func PopulateHandler(w http.ResponseWriter, r *http.Request, database *db.Databa
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
+}
+
+func PredictHandler(w http.ResponseWriter, r *http.Request, database *db.Database) {
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
+		utils.WriteJSONMessage(w, http.StatusUnauthorized, "Missing or invalid Authorization header")
+		return
+	}
+
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+
+	claims := &models.Claims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method")
+		}
+		return utils.JwtKey, nil
+	})
+
+	if err != nil || !token.Valid {
+		utils.WriteJSONMessage(w, http.StatusUnauthorized, "Invalid or expired token")
+		return
+	}
+
+	type Selection struct {
+		Player string `json:"player"`
+		Deck   string `json:"deck"`
+	}
+	type PredictRequest struct {
+		Selections []Selection `json:"selections"`
+	}
+
+	var req PredictRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	fmt.Println("Received selections:")
+	for i, s := range req.Selections {
+		fmt.Printf("Player %d: %s, Deck: %s\n", i+1, s.Player, s.Deck)
+	}
+
+	// w.Header().Set("Content-Type", "application/json")
+	// json.NewEncoder(w).Encode(map[string]string{
+	// 	"prediction": "Not implemented yet",
+	// })
+
+	microserviceURL := os.Getenv("MICROSERVICE_URL") + "/predict"
+	// microserviceURL := "https://mtgmicroservice.onrender.com/predict"
+	jsonBody := []byte(`{"url": "google.sheet.url.com"}`)
+
+	// Call the microservice
+	resp, err := http.Post(microserviceURL, "application/json", bytes.NewBuffer(jsonBody))
+	if err != nil {
+		http.Error(w, "Failed to contact microservice", http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Return the raw response from the microservice to the client
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(resp.StatusCode)
+	io.Copy(w, resp.Body)
 }
 
 func fetchCSVData(url string) ([][]string, error) {
