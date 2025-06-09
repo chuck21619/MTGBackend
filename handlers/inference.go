@@ -1,13 +1,13 @@
 package handlers
 
 import (
+	"bytes"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"io"
-	"os"
-	"bytes"
 	"net/http"
+	"os"
 	"sort"
 	"strings"
 
@@ -113,7 +113,13 @@ func PredictHandler(w http.ResponseWriter, r *http.Request, database *db.Databas
 
 	microserviceURL := os.Getenv("MICROSERVICE_URL") + "/predict"
 	// microserviceURL := "https://mtgmicroservice.onrender.com/predict"
-	jsonBody := []byte(`{"url": "google.sheet.url.com"}`)
+	google_sheet, err := database.GetGoogleSheet(claims.Username)
+	if err != nil {
+		utils.WriteJSONMessage(w, http.StatusInternalServerError, "Internal Error")
+		return
+	}
+	
+	jsonBody := []byte(fmt.Sprintf(`{"url": "%s"}`, google_sheet))
 
 	// Call the microservice
 	resp, err := http.Post(microserviceURL, "application/json", bytes.NewBuffer(jsonBody))
