@@ -38,6 +38,8 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			handlers.PopulateHandler(w, req, r.DB)
 		case "/api/predict":
 			handlers.PredictHandler(w, req, r.DB)
+		case "/api/train":
+			handlers.TrainHandler(w, req, r.DB)
 		default:
 			http.NotFound(w, req)
 		}

@@ -106,21 +106,12 @@ func PredictHandler(w http.ResponseWriter, r *http.Request, database *db.Databas
 		fmt.Printf("Player %d: %s, Deck: %s\n", i+1, s.Player, s.Deck)
 	}
 
-	// w.Header().Set("Content-Type", "application/json")
-	// json.NewEncoder(w).Encode(map[string]string{
-	// 	"prediction": "Not implemented yet",
-	// })
+	jsonBody, err := json.Marshal(req)
+	if err != nil {
+		utils.WriteJSONMessage(w, http.StatusInternalServerError, "Internal error")
+	}
 
 	microserviceURL := os.Getenv("MICROSERVICE_URL") + "/predict"
-	// microserviceURL := "https://mtgmicroservice.onrender.com/predict"
-	google_sheet, err := database.GetGoogleSheet(claims.Username)
-	if err != nil {
-		utils.WriteJSONMessage(w, http.StatusInternalServerError, "Internal Error")
-		return
-	}
-	
-	jsonBody := []byte(fmt.Sprintf(`{"url": "%s"}`, google_sheet))
-
 	// Call the microservice
 	resp, err := http.Post(microserviceURL, "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
@@ -130,6 +121,49 @@ func PredictHandler(w http.ResponseWriter, r *http.Request, database *db.Databas
 	defer resp.Body.Close()
 
 	// Return the raw response from the microservice to the client
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(resp.StatusCode)
+	io.Copy(w, resp.Body)
+}
+
+func TrainHandler(w http.ResponseWriter, r *http.Request, database *db.Database) {
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
+		utils.WriteJSONMessage(w, http.StatusUnauthorized, "Missing or invalid Authorization header")
+		return
+	}
+
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+
+	claims := &models.Claims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method")
+		}
+		return utils.JwtKey, nil
+	})
+
+	if err != nil || !token.Valid {
+		utils.WriteJSONMessage(w, http.StatusUnauthorized, "Invalid or expired token")
+		return
+	}
+
+	microserviceURL := os.Getenv("MICROSERVICE_URL") + "/train"
+	google_sheet, err := database.GetGoogleSheet(claims.Username)
+	if err != nil {
+		utils.WriteJSONMessage(w, http.StatusInternalServerError, "Internal Error")
+		return
+	}
+	
+	jsonBody := []byte(fmt.Sprintf(`{"url": "%s"}`, google_sheet))
+
+	resp, err := http.Post(microserviceURL, "application/json", bytes.NewBuffer(jsonBody))
+	if err != nil {
+		http.Error(w, "Failed to contact microservice", http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(resp.StatusCode)
 	io.Copy(w, resp.Body)
@@ -155,39 +189,6 @@ func fetchCSVData(url string) ([][]string, error) {
 		data = append(data, record)
 	}
 	return data, nil
-}
-
-func generateDataset(url string) ([]Game, error) {
-	data, err := fetchCSVData(url)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(data) < 2 {
-		return nil, fmt.Errorf("not enough rows")
-	}
-
-	headers := data[0]
-	var games []Game
-
-	for _, row := range data[1:] {
-		game := Game{}
-		for i, val := range row {
-			header := headers[i]
-			if header != "winner" && val != "" {
-				game[header] = val
-			}
-		}
-		// Add winner
-		for i, val := range row {
-			if headers[i] == "winner" {
-				game["winner"] = val
-				break
-			}
-		}
-		games = append(games, game)
-	}
-	return games, nil
 }
 
 func getUniquePlayersAndDecks(url string) ([]string, []string, error) {
