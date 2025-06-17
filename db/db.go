@@ -6,6 +6,7 @@ import (
 	"os"
 	"log"
 	_ "github.com/lib/pq"
+	"github.com/chuck21619/MTGBackend/models"
 )
 
 // Database struct to hold the db connection
@@ -54,6 +55,16 @@ func (d *Database) GetRefreshTokenHash(username string) (string, error) {
 		return "", err
 	}
 	return hash, nil
+}
+
+func (d *Database) GetProfileInfo(username string) (*models.User, error) {
+    var user models.User
+    query := `SELECT email, google_sheet FROM users WHERE username = $1`
+    err := d.DB.QueryRow(query, username).Scan(&user.Email, &user.GoogleSheet)
+    if err != nil {
+        return nil, err
+    }
+    return &user, nil
 }
 
 func (d *Database) StoreRefreshToken(username string, hashedToken string) error {
