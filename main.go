@@ -42,6 +42,8 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			handlers.PredictHandler2(w, req, r.DB)
 		case "/api/train":
 			handlers.TrainHandler(w, req, r.DB)
+		case "/api/train2":
+			handlers.TrainHandler2(w, req, r.DB)
 		case "/api/profileInfo":
 			handlers.ProfileInfo(w, req, r.DB)
 		default:

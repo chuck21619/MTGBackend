@@ -9,36 +9,16 @@ import (
 	"net/http"
 	"os"
 	"sort"
-	"strings"
 
 	"github.com/chuck21619/MTGBackend/db"
-	"github.com/chuck21619/MTGBackend/models"
 	"github.com/chuck21619/MTGBackend/utils"
-
-	"github.com/golang-jwt/jwt/v5"
 )
 
 type Game map[string]string
 
 func PopulateHandler(w http.ResponseWriter, r *http.Request, database *db.Database) {
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
-		utils.WriteJSONMessage(w, http.StatusUnauthorized, "Missing or invalid Authorization header")
-		return
-	}
-
-	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-
-	claims := &models.Claims{}
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method")
-		}
-		return utils.JwtKey, nil
-	})
-
-	if err != nil || !token.Valid {
-		utils.WriteJSONMessage(w, http.StatusUnauthorized, "Invalid or expired token")
+	claims, ok := utils.ValidateJWT(w, r)
+	if !ok {
 		return
 	}
 
@@ -66,24 +46,8 @@ func PopulateHandler(w http.ResponseWriter, r *http.Request, database *db.Databa
 }
 
 func PredictHandler(w http.ResponseWriter, r *http.Request, database *db.Database) {
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
-		utils.WriteJSONMessage(w, http.StatusUnauthorized, "Missing or invalid Authorization header")
-		return
-	}
-
-	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-
-	claims := &models.Claims{}
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method")
-		}
-		return utils.JwtKey, nil
-	})
-
-	if err != nil || !token.Valid {
-		utils.WriteJSONMessage(w, http.StatusUnauthorized, "Invalid or expired token")
+	_, ok := utils.ValidateJWT(w, r)
+	if !ok {
 		return
 	}
 
@@ -127,24 +91,8 @@ func PredictHandler(w http.ResponseWriter, r *http.Request, database *db.Databas
 }
 
 func PredictHandler2(w http.ResponseWriter, r *http.Request, database *db.Database) {
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
-		utils.WriteJSONMessage(w, http.StatusUnauthorized, "Missing or invalid Authorization header")
-		return
-	}
-
-	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-
-	claims := &models.Claims{}
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method")
-		}
-		return utils.JwtKey, nil
-	})
-
-	if err != nil || !token.Valid {
-		utils.WriteJSONMessage(w, http.StatusUnauthorized, "Invalid or expired token")
+	_, ok := utils.ValidateJWT(w, r)
+	if !ok {
 		return
 	}
 
@@ -188,24 +136,8 @@ func PredictHandler2(w http.ResponseWriter, r *http.Request, database *db.Databa
 }
 
 func TrainHandler(w http.ResponseWriter, r *http.Request, database *db.Database) {
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
-		utils.WriteJSONMessage(w, http.StatusUnauthorized, "Missing or invalid Authorization header")
-		return
-	}
-
-	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-
-	claims := &models.Claims{}
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method")
-		}
-		return utils.JwtKey, nil
-	})
-
-	if err != nil || !token.Valid {
-		utils.WriteJSONMessage(w, http.StatusUnauthorized, "Invalid or expired token")
+	claims, ok := utils.ValidateJWT(w, r)
+	if !ok {
 		return
 	}
 
@@ -215,7 +147,34 @@ func TrainHandler(w http.ResponseWriter, r *http.Request, database *db.Database)
 		utils.WriteJSONMessage(w, http.StatusInternalServerError, "Internal Error")
 		return
 	}
-	
+
+	jsonBody := []byte(fmt.Sprintf(`{"url": "%s"}`, google_sheet))
+
+	resp, err := http.Post(microserviceURL, "application/json", bytes.NewBuffer(jsonBody))
+	if err != nil {
+		http.Error(w, "Failed to contact microservice", http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(resp.StatusCode)
+	io.Copy(w, resp.Body)
+}
+
+func TrainHandler2(w http.ResponseWriter, r *http.Request, database *db.Database) {
+	claims, ok := utils.ValidateJWT(w, r)
+	if !ok {
+		return
+	}
+
+	microserviceURL := os.Getenv("MICROSERVICE_URL") + "/train"
+	google_sheet, err := database.GetGoogleSheet(claims.Username)
+	if err != nil {
+		utils.WriteJSONMessage(w, http.StatusInternalServerError, "Internal Error")
+		return
+	}
+
 	jsonBody := []byte(fmt.Sprintf(`{"url": "%s"}`, google_sheet))
 
 	resp, err := http.Post(microserviceURL, "application/json", bytes.NewBuffer(jsonBody))

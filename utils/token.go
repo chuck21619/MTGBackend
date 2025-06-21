@@ -8,6 +8,9 @@ import (
 	"time"
 	"os"
 	"log"
+	"fmt"
+	"net/http"
+	"strings"
 )
 
 var JwtKey []byte
@@ -53,4 +56,30 @@ func GenerateEmailVerificationToken() (string, error) {
 		return "", err
 	}
 	return base64.URLEncoding.EncodeToString(token), nil
+}
+
+
+func ValidateJWT(w http.ResponseWriter, r *http.Request) (*models.Claims, bool) {
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
+		WriteJSONMessage(w, http.StatusUnauthorized, "Missing or invalid Authorization header")
+		return nil, false
+	}
+
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+	claims := &models.Claims{}
+
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method")
+		}
+		return JwtKey, nil
+	})
+
+	if err != nil || !token.Valid {
+		WriteJSONMessage(w, http.StatusUnauthorized, "Invalid or expired token")
+		return nil, false
+	}
+
+	return claims, true
 }

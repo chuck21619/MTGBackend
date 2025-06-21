@@ -2,36 +2,15 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/chuck21619/MTGBackend/db"
-	"github.com/chuck21619/MTGBackend/models"
 	"github.com/chuck21619/MTGBackend/utils"
-
-	"github.com/golang-jwt/jwt/v5"
 )
 
 func ProfileInfo(w http.ResponseWriter, r *http.Request, database *db.Database) {
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
-		utils.WriteJSONMessage(w, http.StatusUnauthorized, "Missing or invalid Authorization header")
-		return
-	}
-
-	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-
-	claims := &models.Claims{}
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method")
-		}
-		return utils.JwtKey, nil
-	})
-
-	if err != nil || !token.Valid {
-		utils.WriteJSONMessage(w, http.StatusUnauthorized, "Invalid or expired token")
+	claims, ok := utils.ValidateJWT(w, r)
+	if !ok {
 		return
 	}
 
@@ -52,24 +31,8 @@ func ProfileInfo(w http.ResponseWriter, r *http.Request, database *db.Database) 
 }
 
 func UpdateEmailHandler(w http.ResponseWriter, r *http.Request, database *db.Database) {
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
-		utils.WriteJSONMessage(w, http.StatusUnauthorized, "Missing or invalid Authorization header")
-		return
-	}
-
-	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-
-	claims := &models.Claims{}
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method")
-		}
-		return utils.JwtKey, nil
-	})
-
-	if err != nil || !token.Valid {
-		utils.WriteJSONMessage(w, http.StatusUnauthorized, "Invalid or expired token")
+	claims, ok := utils.ValidateJWT(w, r)
+	if !ok {
 		return
 	}
 
@@ -81,7 +44,7 @@ func UpdateEmailHandler(w http.ResponseWriter, r *http.Request, database *db.Dat
 		return
 	}
 
-	err = database.UpdateUserEmail(claims.Username, body.NewEmail)
+	err := database.UpdateUserEmail(claims.Username, body.NewEmail)
 	if err != nil {
 		utils.WriteJSONMessage(w, http.StatusInternalServerError, "Failed to update email")
 		return
@@ -91,24 +54,8 @@ func UpdateEmailHandler(w http.ResponseWriter, r *http.Request, database *db.Dat
 }
 
 func GoogleSheetHandler(w http.ResponseWriter, r *http.Request, database *db.Database) {
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
-		utils.WriteJSONMessage(w, http.StatusUnauthorized, "Missing or invalid Authorization header")
-		return
-	}
-
-	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-
-	claims := &models.Claims{}
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method")
-		}
-		return utils.JwtKey, nil
-	})
-
-	if err != nil || !token.Valid {
-		utils.WriteJSONMessage(w, http.StatusUnauthorized, "Invalid or expired token")
+	claims, ok := utils.ValidateJWT(w, r)
+	if !ok {
 		return
 	}
 
@@ -120,7 +67,7 @@ func GoogleSheetHandler(w http.ResponseWriter, r *http.Request, database *db.Dat
 		return
 	}
 
-	err = database.UpdateGoogleSheet(claims.Username, body.NewGoogleSheet)
+	err := database.UpdateGoogleSheet(claims.Username, body.NewGoogleSheet)
 	if err != nil {
 		utils.WriteJSONMessage(w, http.StatusInternalServerError, "Failed to update google sheet")
 		return
