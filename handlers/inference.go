@@ -151,7 +151,8 @@ func TrainHandler(w http.ResponseWriter, r *http.Request, database *db.Database)
 		http.Error(w, "Failed to contact microservice", http.StatusInternalServerError)
 		return
 	}
-	println("TrainHandler - resp: ", resp)
+	println("TrainHandler - resp.StatusCode: ", resp.StatusCode)
+	println("TrainHandler - resp.Body: ", resp.Body)
 	defer resp.Body.Close()
 
 	w.Header().Set("Content-Type", "application/json")
