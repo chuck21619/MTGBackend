@@ -46,7 +46,7 @@ func PopulateHandler(w http.ResponseWriter, r *http.Request, database *db.Databa
 }
 
 func PredictHandler(w http.ResponseWriter, r *http.Request, database *db.Database) {
-	_, ok := utils.ValidateJWT(w, r)
+	claims, ok := utils.ValidateJWT(w, r)
 	if !ok {
 		return
 	}
@@ -57,6 +57,7 @@ func PredictHandler(w http.ResponseWriter, r *http.Request, database *db.Databas
 	}
 	type PredictRequest struct {
 		Selections []Selection `json:"selections"`
+		Username   string      `json:"username"`
 	}
 
 	var req PredictRequest
@@ -64,11 +65,7 @@ func PredictHandler(w http.ResponseWriter, r *http.Request, database *db.Databas
 		http.Error(w, "Invalid request", http.StatusBadRequest)
 		return
 	}
-
-	fmt.Println("Received selections:")
-	for i, s := range req.Selections {
-		fmt.Printf("Player %d: %s, Deck: %s\n", i+1, s.Player, s.Deck)
-	}
+	req.Username = claims.Username
 
 	jsonBody, err := json.Marshal(req)
 	if err != nil {
@@ -91,7 +88,7 @@ func PredictHandler(w http.ResponseWriter, r *http.Request, database *db.Databas
 }
 
 func PredictHandler2(w http.ResponseWriter, r *http.Request, database *db.Database) {
-	_, ok := utils.ValidateJWT(w, r)
+	claims, ok := utils.ValidateJWT(w, r)
 	if !ok {
 		return
 	}
@@ -102,6 +99,7 @@ func PredictHandler2(w http.ResponseWriter, r *http.Request, database *db.Databa
 	}
 	type PredictRequest struct {
 		Selections []Selection `json:"selections"`
+		Username   string      `json:"username"`
 	}
 
 	var req PredictRequest
@@ -109,11 +107,7 @@ func PredictHandler2(w http.ResponseWriter, r *http.Request, database *db.Databa
 		http.Error(w, "Invalid request", http.StatusBadRequest)
 		return
 	}
-
-	fmt.Println("Received selections:")
-	for i, s := range req.Selections {
-		fmt.Printf("Player %d: %s, Deck: %s\n", i+1, s.Player, s.Deck)
-	}
+	req.Username = claims.Username
 
 	jsonBody, err := json.Marshal(req)
 	if err != nil {
@@ -148,7 +142,7 @@ func TrainHandler(w http.ResponseWriter, r *http.Request, database *db.Database)
 		return
 	}
 
-	jsonBody := []byte(fmt.Sprintf(`{"url": "%s"}`, google_sheet))
+	jsonBody := []byte(fmt.Sprintf(`{"url": "%s", "username": "%s"}`, google_sheet, claims.Username))
 
 	resp, err := http.Post(microserviceURL, "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
@@ -168,14 +162,14 @@ func TrainHandler2(w http.ResponseWriter, r *http.Request, database *db.Database
 		return
 	}
 
-	microserviceURL := os.Getenv("MICROSERVICE_URL") + "/train"
+	microserviceURL := os.Getenv("MICROSERVICE_URL") + "/train2"
 	google_sheet, err := database.GetGoogleSheet(claims.Username)
 	if err != nil {
 		utils.WriteJSONMessage(w, http.StatusInternalServerError, "Internal Error")
 		return
 	}
 
-	jsonBody := []byte(fmt.Sprintf(`{"url": "%s"}`, google_sheet))
+	jsonBody := []byte(fmt.Sprintf(`{"url": "%s", "username": "%s"}`, google_sheet, claims.Username))
 
 	resp, err := http.Post(microserviceURL, "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
