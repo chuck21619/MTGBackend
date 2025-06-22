@@ -141,14 +141,17 @@ func TrainHandler(w http.ResponseWriter, r *http.Request, database *db.Database)
 		utils.WriteJSONMessage(w, http.StatusInternalServerError, "Internal Error")
 		return
 	}
+	println("TrainHandler - google sheet url: ", google_sheet)
 
 	jsonBody := []byte(fmt.Sprintf(`{"url": "%s", "username": "%s"}`, google_sheet, claims.Username))
 
+	println("TrainHandler - jsonBody: ", jsonBody)
 	resp, err := http.Post(microserviceURL, "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		http.Error(w, "Failed to contact microservice", http.StatusInternalServerError)
 		return
 	}
+	println("TrainHandler - resp: ", resp)
 	defer resp.Body.Close()
 
 	w.Header().Set("Content-Type", "application/json")
